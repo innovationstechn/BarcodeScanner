@@ -1,14 +1,15 @@
-import
-'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
 import 'dnn_provider.dart';
-import '../enn/enn.dart';
 
 class DNNScreen extends StatefulWidget {
+  const DNNScreen({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _DNNScreen();
 }
@@ -36,13 +37,28 @@ class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
         body: Column(
           children: <Widget>[
             const Expanded(
-                flex: 2,
+                flex: 1,
                 child: Center(
                   child: Text(
                     "DELIVERY NOTE NUMBER",
                     style: TextStyle(fontSize: 15),
                   ),
                 )),
+            Expanded(
+                flex: 2,
+                child: Consumer<DNNProvider>(builder: (context, model, child) {
+                  return model.dnnCode == "" || scanningState
+                      ? Container()
+                      : SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: customizeButton("NEXT", 80, () async {
+                            controller!.pauseCamera();
+                            Navigator.pushNamed(context, 'ean',
+                                    arguments: model.dnnCode)
+                                .then((value) => controller!.resumeCamera());
+                          }),
+                      );
+                })),
             Expanded(
                 flex: 4,
                 child: customizeQRView(
@@ -52,18 +68,20 @@ class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
                 child: Consumer<DNNProvider>(builder: (context, model, child) {
                   return Column(
                     children: [
-                      if(model.dnnCode!="")
-                      Padding(
-                        padding: const EdgeInsets.only(top:10,bottom:10),
-                        child: Text(
-                          'Barcode scan: ${model.dnnCode}',
-                          style:
-                              const TextStyle(color: Colors.black, fontSize: 15),
+                      if (model.dnnCode != "" && !scanningState)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, bottom: 10),
+                          child: Text(
+                            'Barcode scan: ${model.dnnCode}',
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 15),
+                          ),
                         ),
-                      ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
-                        child: customizeScanButton(scanningState, 100, 20, "SCAN DNN", () {
+                        child: customizeScanButton(scanningState, 100, 20,
+                            model.dnnCode == "" ? "SCAN DNN" : "RESCAN DNN",
+                            () {
                           scanningState = !scanningState;
                           model.setState();
                         }),
@@ -85,9 +103,7 @@ class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
         scanningState = !scanningState;
         Provider.of<DNNProvider>(context, listen: false)
             .setBarCode(scanData.code);
-        controller.pauseCamera();
-        Navigator.pushNamed(context, 'enn',arguments: scanData.code)
-            .then((value) => controller.resumeCamera());
+        Vibrate.vibrate();
       }
     });
   }

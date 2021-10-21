@@ -1,27 +1,30 @@
 import 'package:flutter/cupertino.dart';
-import 'package:serial_number_barcode_scanner/models/enn_model.dart';
+import 'package:serial_number_barcode_scanner/models/ean_model.dart';
 
-class SSNProvider extends ChangeNotifier{
+class SNNProvider extends ChangeNotifier{
 
-  List<ENNModel> ennList=[];
-  List<String> ssnCodes = [];
+  List<EANModel> eanList=[];
+  List<String> snnCodes = [];
 
   void add(var scanData){
-    if (!ssnCodes.contains(scanData.code.toString())) {
-      ssnCodes.add(scanData.code.toString());
-      notifyListeners();
+    if (!snnCodes.contains(scanData.code.toString())) {
+      snnCodes.add(scanData.code.toString());
     }
+    setState();
   }
 
   void remove(int index){
-    ssnCodes.removeAt(
-        ssnCodes.length - index - 1);
-    notifyListeners();
+    snnCodes.removeAt(
+        snnCodes.length - index - 1);
+    setState();
   }
 
   String getQRCode(int index){
-    return ssnCodes.elementAt(
-        ssnCodes.length - 1 - index);
+    return snnCodes.elementAt(
+        snnCodes.length - 1 - index);
   }
 
+  void setState(){
+    notifyListeners();
+  }
 }

@@ -57,7 +57,12 @@ class _ConfigurationState extends State<Configuration> with CustomizeWidgets {
                               apiUrl: urlController.text,
                               deviceID: deviceIDController.text,
                               key: keyController.text);
-                          await model.setConfiguration(configurationHive);
+                          await model.setConfiguration(configurationHive).then((value) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('CONFIGURATION SAVED')),
+                            );
+                            Navigator.pop(context);
+                          });
                         }, color: Colors.red)
                       ]),
                 );

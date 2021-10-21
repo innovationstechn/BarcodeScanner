@@ -47,6 +47,8 @@ dependencies:
   # For generating checksums
   crypto: ^3.0.1
 
+  #For vibration
+  flutter_vibrate: ^1.3.0
 
 dev_dependencies:
   flutter_test:

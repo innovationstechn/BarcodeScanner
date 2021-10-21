@@ -4,12 +4,12 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:serial_number_barcode_scanner/routes.dart';
 import 'package:serial_number_barcode_scanner/screens/dnn/dnn_provider.dart';
-import 'package:serial_number_barcode_scanner/screens/enn/enn_provider.dart';
+import 'package:serial_number_barcode_scanner/screens/ean/enn_provider.dart';
+import 'package:serial_number_barcode_scanner/screens/final/final_provider.dart';
 import 'package:serial_number_barcode_scanner/screens/snn/snn_provider.dart';
 import 'package:serial_number_barcode_scanner/state/configuration_state.dart';
 import 'package:serial_number_barcode_scanner/state/uploading_state.dart';
 import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
-
 import 'api/data_uploader.dart';
 import 'models/configuration_hive.dart';
 import 'models/upload_item.dart';
@@ -19,11 +19,12 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<DNNProvider>(create: (_) => DNNProvider()),
-      ChangeNotifierProvider<ENNProvider>(create: (_) => ENNProvider()),
-      ChangeNotifierProvider<SSNProvider>(create: (_) => SSNProvider()),
+      ChangeNotifierProvider<EANProvider>(create: (_) => EANProvider()),
+      ChangeNotifierProvider<SNNProvider>(create: (_) => SNNProvider()),
       ChangeNotifierProvider<ConfigurationState>(
           create: (_) => ConfigurationState()),
       ChangeNotifierProvider<UploadingState>(create: (_) => UploadingState()),
+      ChangeNotifierProvider<FinalProvider>(create: (_) => FinalProvider()),
     ],
     child: const MaterialApp(
       home: MyHome(),
@@ -109,12 +110,12 @@ class MyHome extends StatelessWidget with CustomizeWidgets {
                                             Provider.of<DNNProvider>(context,
                                                     listen: false)
                                                 .dnnCode = "",
-                                            Provider.of<ENNProvider>(context,
+                                            Provider.of<EANProvider>(context,
                                                     listen: false)
-                                                .ennCode = "",
-                                            Provider.of<SSNProvider>(context,
+                                                .eanCode = "",
+                                            Provider.of<SNNProvider>(context,
                                                     listen: false)
-                                                .ssnCodes = []
+                                                .snnCodes = []
                                           });
                                 })),
                   customizeExpandableFittedBox(

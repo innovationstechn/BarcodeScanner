@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:serial_number_barcode_scanner/screens/final/final.dart';
@@ -9,9 +10,9 @@ import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.da
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
 
 class SNN extends StatefulWidget {
-  final String DNN, ENN;
+  final String DNN, EAN;
 
-  const SNN({required this.DNN, required this.ENN});
+  const SNN({required this.DNN, required this.EAN});
 
   @override
   State<StatefulWidget> createState() => _SNN();
@@ -51,20 +52,27 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
                             child: customizeDisplayBarCode("DNN", widget.DNN)),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.9,
-                          child: customizeButton("FINISH", 80,() async {
-                            int scanItem = Provider.of<SSNProvider>(context, listen: false).ssnCodes.length;
-                            if (scanItem>0) {
+                          child: customizeButton("FINISH", 80, () async {
+                            int scanItem =
+                                Provider.of<SNNProvider>(context, listen: false)
+                                    .snnCodes
+                                    .length;
+                            if (scanItem > 0) {
                               controller!.pauseCamera();
                               Navigator.pushAndRemoveUntil<dynamic>(
                                 context,
                                 MaterialPageRoute<dynamic>(
-                                  builder: (BuildContext context) => const Final(),
+                                  builder: (BuildContext context) =>
+                                      const Final(),
                                 ),
-                                    (route) => false,//if you want to disable back feature set to false
+                                (route) =>
+                                    false, //if you want to disable back feature set to false
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please scan at least one item')));
+                                  const SnackBar(
+                                      content: Text(
+                                          'Please scan at least one item')));
                             }
                           }),
                         )
@@ -87,20 +95,25 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
                       children: [
                         SizedBox(
                             width: MediaQuery.of(context).size.width * 0.9,
-                            child: customizeDisplayBarCode("Current ENN", widget.ENN)),
+                            child: customizeDisplayBarCode(
+                                "Current EAN", widget.EAN)),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.9,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: customizeScanButton(
-                              scanningState,
-                              70,
-                              35,
-                              "SCAN SNN",
-                              () {
-                                scanningState = !scanningState;
-                              },
-                            ),
+                          child: Consumer<SNNProvider>(
+                            builder: (context, model, child) {
+                              return Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child: customizeScanButton(
+                                    scanningState,
+                                    70,
+                                    35,
+                                    "SCAN SNN",
+                                    () {
+                                      scanningState = !scanningState;
+                                      model.setState();
+                                    },
+                                  ));
+                            },
                           ),
                         )
                       ],
@@ -109,14 +122,13 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
                 )),
             Expanded(
                 flex: 3,
-                child:
-                    Consumer<SSNProvider>(builder: (context, model, child) {
+                child: Consumer<SNNProvider>(builder: (context, model, child) {
                   return ListView.builder(
-                      itemCount: model.ssnCodes.length,
+                      itemCount: model.snnCodes.length,
                       itemBuilder: (BuildContext context, int index) {
                         return ListTile(
                             leading: Text(
-                                '# ${(model.ssnCodes.length - index).toString()}'),
+                                '# ${(model.snnCodes.length - index).toString()}'),
                             trailing: GestureDetector(
                               child: const Icon(
                                 Icons.delete,
@@ -137,10 +149,11 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       if (scanningState) {
         scanningState = !scanningState;
-        Provider.of<SSNProvider>(context, listen: false).add(scanData);
+        Provider.of<SNNProvider>(context, listen: false).add(scanData);
+        Vibrate.vibrate();
       }
     });
   }

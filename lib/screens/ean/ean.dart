@@ -1,21 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
 import 'enn_provider.dart';
 
-class ENN extends StatefulWidget {
+class EAN extends StatefulWidget {
   final String DNN;
 
-  ENN({required this.DNN});
+  const EAN({required this.DNN});
 
   @override
-  State<StatefulWidget> createState() => _ENN();
+  State<StatefulWidget> createState() => _EAN();
 }
 
-class _ENN extends State<ENN> with QRCode, CustomizeWidgets {
+class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
   Barcode? result;
   QRViewController? controller;
   bool scanningState = false;
@@ -45,15 +46,12 @@ class _ENN extends State<ENN> with QRCode, CustomizeWidgets {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       customizeDisplayBarCode("DNN", widget.DNN),
-                      customizeButton("FINISH", 100,() async {
-                        if (result != null) {
-                          Navigator.pushNamed(context, 'snn',arguments: [widget.DNN,result!.code]);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Please scan ENN before proceed')));
-                        }
+                      Consumer<EANProvider>(builder: (context, model, child) {
+                        return model.eanCode!="" && !scanningState?customizeButton("NEXT", 100,
+                            () async {
+                            Navigator.pushNamed(context, 'snn',
+                                arguments: [widget.DNN, model.eanCode]);
+                        }):Container();
                       })
                     ],
                   ),
@@ -67,18 +65,18 @@ class _ENN extends State<ENN> with QRCode, CustomizeWidgets {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 40, 20, 5),
                   child:
-                      Consumer<ENNProvider>(builder: (context, model, child) {
+                      Consumer<EANProvider>(builder: (context, model, child) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (result != null)
-                          Text('Barcode Scanned: ${result!.code}'),
+                        if (!scanningState)
+                          Text('Barcode Scanned: ${model.eanCode}'),
                         SizedBox(
                           child: customizeScanButton(
                             scanningState,
                             100,
                             35,
-                            "SCAN ENN",
+                            model.eanCode == "" ? "SCAN EAN" : "RESCAN EAN",
                             () {
                               if (!scanningState) {
                                 controller!.resumeCamera();
@@ -107,8 +105,9 @@ class _ENN extends State<ENN> with QRCode, CustomizeWidgets {
       if (scanningState) {
         result = scanData;
         scanningState = !scanningState;
-        Provider.of<ENNProvider>(context, listen: false).setENN(scanData.code);
+        Provider.of<EANProvider>(context, listen: false).setEAN(scanData.code);
         controller.pauseCamera();
+        Vibrate.vibrate();
       }
     });
   }
