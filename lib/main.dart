@@ -10,6 +10,7 @@ import 'package:serial_number_barcode_scanner/screens/snn/snn_provider.dart';
 import 'package:serial_number_barcode_scanner/state/configuration_state.dart';
 import 'package:serial_number_barcode_scanner/state/uploading_state.dart';
 import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
+
 import 'api/data_uploader.dart';
 import 'models/configuration_hive.dart';
 import 'models/upload_item.dart';
@@ -86,14 +87,14 @@ class MyHome extends StatelessWidget with CustomizeWidgets {
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold),
                             )),
-                          customizeButton(
+                          if (model.itemsNeedToBeUploaded)
+                            customizeButton(
                               "SEND MANUALLY",
                               150,
-                              configModel.isConfigurationNeeded
-                                  ? null
-                                  : () async {
-                                      model.upload();
-                                    }),
+                              () async {
+                                model.upload();
+                              },
+                            ),
                         ],
                       )),
                   customizeExpandableFittedBox(
