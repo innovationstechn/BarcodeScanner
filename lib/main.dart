@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:serial_number_barcode_scanner/models/dnn_model.dart';
+import 'package:serial_number_barcode_scanner/models/sn.dart';
 import 'package:serial_number_barcode_scanner/routes.dart';
 import 'package:serial_number_barcode_scanner/screens/dnn/dnn_provider.dart';
 import 'package:serial_number_barcode_scanner/screens/ean/enn_provider.dart';
@@ -13,6 +15,7 @@ import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.da
 
 import 'api/data_uploader.dart';
 import 'models/configuration_hive.dart';
+import 'models/ean_model.dart';
 import 'models/upload_item.dart';
 
 void main() async {
@@ -24,7 +27,8 @@ void main() async {
       ChangeNotifierProvider<SNNProvider>(create: (_) => SNNProvider()),
       ChangeNotifierProvider<ConfigurationState>(
           create: (_) => ConfigurationState()),
-      ChangeNotifierProvider<UploadingState>(create: (_) => UploadingState()),
+      ChangeNotifierProvider<UploadingState>(
+          create: (context) => UploadingState()),
       ChangeNotifierProvider<FinalProvider>(create: (_) => FinalProvider()),
     ],
     child: const MaterialApp(
@@ -36,6 +40,9 @@ void main() async {
 
 Future<void> _initHive() async {
   Hive.registerAdapter(UploadItemAdapter());
+  Hive.registerAdapter(DNNAdapter());
+  Hive.registerAdapter(EANModelAdapter());
+  Hive.registerAdapter(SNAdapter());
   Hive.registerAdapter(ConfigurationHiveAdapter());
 
   await Hive.initFlutter();
@@ -87,14 +94,20 @@ class MyHome extends StatelessWidget with CustomizeWidgets {
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold),
                             )),
-                          if (model.itemsNeedToBeUploaded)
-                            customizeButton(
-                              "SEND MANUALLY",
-                              150,
-                              () async {
-                                model.upload();
-                              },
-                            ),
+                          customizeButton(
+                            "SEND MANUALLY",
+                            150,
+                            () async {
+                              String response = await model
+                                  .upload(configModel.configuration!);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(response),
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       )),
                   customizeExpandableFittedBox(

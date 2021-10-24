@@ -1,20 +1,24 @@
+import 'package:hive/hive.dart';
 import 'package:serial_number_barcode_scanner/models/ean_model.dart';
 
-class DNN{
-  String dnn;
-  List<EANModel> eanList=[];
+part 'dnn_model.g.dart';
 
-  DNN({required this.dnn,required this.eanList});
+@HiveType(typeId: 3)
+class DNN {
+  @HiveField(0)
+  String dnn;
+  @HiveField(1)
+  List<EANModel> eanList = [];
+
+  DNN({required this.dnn, required this.eanList});
 
   Map<String, List<String>> toJson() {
-    Map<String, List<String>> json = Map();
+    Map<String, List<String>> json = {};
 
-    eanList.forEach((element) {
-      print("EANList:"+element.toString());
+    for (var element in eanList) {
       json[element.eanCode] = element.toJson();
-    });
+    }
 
     return json;
   }
-
 }

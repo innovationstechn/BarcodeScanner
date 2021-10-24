@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:serial_number_barcode_scanner/api/data_uploader.dart';
-import 'package:serial_number_barcode_scanner/models/upload_item.dart';
+import 'package:serial_number_barcode_scanner/models/configuration_hive.dart';
+import 'package:serial_number_barcode_scanner/models/dnn_model.dart';
 
 class UploadingState extends ChangeNotifier {
   late DataUploader _dataUploader;
@@ -12,14 +13,15 @@ class UploadingState extends ChangeNotifier {
 
   UploadingState() {
     _dataUploader = DataUploader(
-      uploadingDone: () => notifyListeners(),
+      uploadingDone: (String response) => notifyListeners(),
       uploadingFailed: () => notifyListeners(),
       startedUploading: () => notifyListeners(),
     );
   }
   // check Wait
 
-  Future<void> queue(UploadItem item) => _dataUploader.queueItem(item);
+  Future<void> queue(DNN item) => _dataUploader.queueItem(item);
 
-  Future<void> upload() => _dataUploader.upload();
+  Future<String> upload(ConfigurationHive configuration) =>
+      _dataUploader.upload(configuration);
 }
