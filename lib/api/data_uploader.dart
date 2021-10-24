@@ -83,6 +83,7 @@ class DataUploader {
 
       uploadingDone(response);
     } catch (e) {
+      response = "Could not send data to server.";
       isUploading = false;
       uploadingFailed();
     } finally {
