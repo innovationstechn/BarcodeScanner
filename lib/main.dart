@@ -94,20 +94,21 @@ class MyHome extends StatelessWidget with CustomizeWidgets {
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold),
                             )),
-                          customizeButton(
-                            "SEND MANUALLY",
-                            150,
-                            () async {
-                              String response = await model
-                                  .upload(configModel.configuration!);
+                          if (model.itemsNeedToBeUploaded)
+                            customizeButton(
+                              "SEND MANUALLY",
+                              150,
+                              () async {
+                                String response = await model
+                                    .upload(configModel.configuration!);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(response),
-                                ),
-                              );
-                            },
-                          ),
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(response),
+                                  ),
+                                );
+                              },
+                            ),
                         ],
                       )),
                   customizeExpandableFittedBox(

@@ -1,10 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
+
 import 'enn_provider.dart';
 
 class EAN extends StatefulWidget {
@@ -47,11 +49,12 @@ class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
                     children: [
                       customizeDisplayBarCode("DNN", widget.DNN),
                       Consumer<EANProvider>(builder: (context, model, child) {
-                        return model.eanCode!="" && !scanningState?customizeButton("NEXT", 100,
-                            () async {
-                            Navigator.pushNamed(context, 'snn',
-                                arguments: [widget.DNN, model.eanCode]);
-                        }):Container();
+                        return model.eanCode != "" && !scanningState
+                            ? customizeButton("NEXT", 100, () async {
+                                Navigator.pushNamed(context, 'snn',
+                                    arguments: [widget.DNN, model.eanCode]);
+                              })
+                            : Container();
                       })
                     ],
                   ),

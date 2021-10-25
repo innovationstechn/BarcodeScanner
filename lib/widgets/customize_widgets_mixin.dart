@@ -25,15 +25,18 @@ mixin CustomizeWidgets {
               ));
   }
 
-  Widget customizeButton(String name, double height,Function? btnClick, {Color color=Colors.blue}) {
-    return Padding(
+  Widget customizeButton(String name, double height, Function? btnClick,
+      {Color color = Colors.blue}) {
+    return Container(
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
               minimumSize: Size.fromHeight(height),
-              shadowColor: color==Colors.blue?Colors.lightBlueAccent:Colors.redAccent,
-              primary: color==Colors.blue?Colors.blue:Colors.red),
-          onPressed: btnClick == null? null : () => btnClick(),
+              shadowColor: color == Colors.blue
+                  ? Colors.lightBlueAccent
+                  : Colors.redAccent,
+              primary: color == Colors.blue ? Colors.blue : Colors.red),
+          onPressed: btnClick == null ? null : () => btnClick(),
           child: Text(
             name,
             style: const TextStyle(fontSize: 35),
@@ -41,12 +44,11 @@ mixin CustomizeWidgets {
     );
   }
 
-  Widget customizeDisplayBarCode(
-      String barcodeName, String barcode) {
+  Widget customizeDisplayBarCode(String barcodeName, String barcode) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (barcodeName!="")
+        if (barcodeName != "")
           Text(
             barcodeName,
             style: const TextStyle(color: Colors.black, fontSize: 15),
@@ -81,41 +83,37 @@ mixin CustomizeWidgets {
             child: buildQrView));
   }
 
-  Widget customizeExpandableFittedBox(BuildContext context,int flex,Widget widget){
-   return Expanded(
-        flex: flex,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
-              child: widget),
-        ));
+  Widget customizeExpandableFittedBox(
+      BuildContext context, int flex, Widget widget) {
+    return Expanded(flex: flex, child: widget);
   }
 
-  Widget customizeTextInput(TextEditingController controller,String title,String hint){
+  Widget customizeTextInput(
+      TextEditingController controller, String title, String hint) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-      Text(
-        title,
-        style: const TextStyle(color: Colors.redAccent, fontSize: 14),
-      ),
-      TextField(
-        controller:controller,
-        decoration: InputDecoration(
-          enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.black12),
-          ),
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.red),
-          ),
-          hintText: hint,
-          // hintStyle: const TextStyle(color: Colors.grey),
+        Text(
+          title,
+          style: const TextStyle(color: Colors.redAccent, fontSize: 14),
         ),
-      ),
-      const SizedBox(
-        height: 10,
-      )
-    ],);
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.black12),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+            ),
+            hintText: hint,
+            // hintStyle: const TextStyle(color: Colors.grey),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        )
+      ],
+    );
   }
 }
