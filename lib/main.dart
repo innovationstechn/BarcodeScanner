@@ -16,7 +16,6 @@ import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.da
 import 'api/data_uploader.dart';
 import 'models/configuration_hive.dart';
 import 'models/ean_model.dart';
-import 'models/upload_item.dart';
 
 void main() async {
   await _initHive();
@@ -39,7 +38,6 @@ void main() async {
 }
 
 Future<void> _initHive() async {
-  Hive.registerAdapter(UploadItemAdapter());
   Hive.registerAdapter(DNNAdapter());
   Hive.registerAdapter(EANModelAdapter());
   Hive.registerAdapter(SNAdapter());
