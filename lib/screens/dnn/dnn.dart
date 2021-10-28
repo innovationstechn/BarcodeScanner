@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
+import 'package:serial_number_barcode_scanner/widgets/qr_view_style.dart';
+import 'package:serial_number_barcode_scanner/widgets/scan_button.dart';
+import 'package:serial_number_barcode_scanner/widgets/simple_button.dart';
 import 'dnn_provider.dart';
 
 class DNNScreen extends StatefulWidget {
@@ -14,8 +16,7 @@ class DNNScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _DNNScreen();
 }
 
-class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
-  Barcode? result;
+class _DNNScreen extends State<DNNScreen> with QRCode{
   QRViewController? controller;
   bool scanningState = false;
 
@@ -47,28 +48,28 @@ class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
             Expanded(
                 flex: 2,
                 child: Consumer<DNNProvider>(builder: (context, model, child) {
-                  return model.dnnCode == "" || scanningState
+                  return model.dnnCode.isEmpty || scanningState
                       ? Container()
                       : SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child: customizeButton("NEXT", 80, () async {
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          child: SimpleButton("NEXT", 80, () async {
                             controller!.pauseCamera();
                             Navigator.pushNamed(context, 'ean',
                                     arguments: model.dnnCode)
                                 .then((value) => controller!.resumeCamera());
                           }),
-                      );
+                        );
                 })),
             Expanded(
                 flex: 4,
-                child: customizeQRView(
-                    buildQrView(context, _onQRViewCreated, 250))),
+                child:
+                    QRViewStyle(buildQrView(context, _onQRViewCreated, 250))),
             Expanded(
                 flex: 3,
                 child: Consumer<DNNProvider>(builder: (context, model, child) {
                   return Column(
                     children: [
-                      if (model.dnnCode != "" && !scanningState)
+                      if (model.dnnCode.isNotEmpty && !scanningState)
                         Padding(
                           padding: const EdgeInsets.only(top: 10, bottom: 10),
                           child: Text(
@@ -79,12 +80,17 @@ class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
                         ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
-                        child: customizeScanButton(scanningState, 100, 20,
-                            model.dnnCode == "" ? "SCAN DNN" : "RESCAN DNN",
-                            () {
-                          scanningState = !scanningState;
-                          model.setState();
-                        }),
+                        child: ScanButton(
+                            scanningState: scanningState,
+                            height: 100,
+                            fontSize: 20,
+                            name: model.dnnCode.isEmpty
+                                ? "SCAN DNN"
+                                : "RESCAN DNN",
+                            btnClick: () {
+                              scanningState = !scanningState;
+                              model.setState();
+                            }),
                       )
                     ],
                   );
@@ -95,19 +101,25 @@ class _DNNScreen extends State<DNNScreen> with QRCode, CustomizeWidgets {
     );
   }
 
+  // This method will be called when QRScanner view is created.
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
 
+    // Controller is listening to the stream of scan codes.
     controller.scannedDataStream.listen((scanData) async {
       if (scanningState) {
+        // Disabling the scan
         scanningState = !scanningState;
+        // DNN Provider is saving the scan bar code for temporary storage also notifying listener.
         Provider.of<DNNProvider>(context, listen: false)
             .setBarCode(scanData.code);
+        // Producing Vibrations
         Vibrate.vibrate();
       }
     });
   }
 
+  // Disposing the controller
   @override
   void dispose() {
     controller?.dispose();

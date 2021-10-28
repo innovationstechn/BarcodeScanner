@@ -4,22 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
+import 'package:serial_number_barcode_scanner/widgets/display_barcode.dart';
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
+import 'package:serial_number_barcode_scanner/widgets/qr_view_style.dart';
+import 'package:serial_number_barcode_scanner/widgets/scan_button.dart';
+import 'package:serial_number_barcode_scanner/widgets/simple_button.dart';
 
 import 'enn_provider.dart';
 
 class EAN extends StatefulWidget {
-  final String DNN;
+  final String dnn;
 
-  const EAN({required this.DNN});
+  const EAN({required this.dnn});
 
   @override
   State<StatefulWidget> createState() => _EAN();
 }
 
-class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
-  Barcode? result;
+class _EAN extends State<EAN> with QRCode {
   QRViewController? controller;
   bool scanningState = false;
 
@@ -47,12 +49,12 @@ class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      customizeDisplayBarCode("DNN", widget.DNN),
+                      DisplayBarCode(barcodeName: "DNN", barcode: widget.dnn),
                       Consumer<EANProvider>(builder: (context, model, child) {
-                        return model.eanCode != "" && !scanningState
-                            ? customizeButton("NEXT", 100, () async {
+                        return model.eanCode.isNotEmpty && !scanningState
+                            ? SimpleButton("NEXT", 100, () async {
                                 Navigator.pushNamed(context, 'snn',
-                                    arguments: [widget.DNN, model.eanCode]);
+                                    arguments: [widget.dnn, model.eanCode]);
                               })
                             : Container();
                       })
@@ -61,8 +63,8 @@ class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
                 )),
             Expanded(
                 flex: 3,
-                child: customizeQRView(
-                    buildQrView(context, _onQRViewCreated, 300))),
+                child:
+                    QRViewStyle(buildQrView(context, _onQRViewCreated, 300))),
             Expanded(
                 flex: 2,
                 child: Padding(
@@ -75,12 +77,14 @@ class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
                         if (!scanningState)
                           Text('Barcode Scanned: ${model.eanCode}'),
                         SizedBox(
-                          child: customizeScanButton(
-                            scanningState,
-                            100,
-                            35,
-                            model.eanCode == "" ? "SCAN EAN" : "RESCAN EAN",
-                            () {
+                          child: ScanButton(
+                            scanningState: scanningState,
+                            height: 100,
+                            fontSize: 35,
+                            name: model.eanCode.isEmpty
+                                ? "SCAN EAN"
+                                : "RESCAN EAN",
+                            btnClick: () {
                               if (!scanningState) {
                                 controller!.resumeCamera();
                               } else {
@@ -104,17 +108,21 @@ class _EAN extends State<EAN> with QRCode, CustomizeWidgets {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
 
+    // Controller is listening to the stream of scan codes.
     controller.scannedDataStream.listen((scanData) {
       if (scanningState) {
-        result = scanData;
+        // Disabling the scan
         scanningState = !scanningState;
+        // EAN Provider is saving the scan bar code for temporary storage also notifying listener.
         Provider.of<EANProvider>(context, listen: false).setEAN(scanData.code);
         controller.pauseCamera();
+        // Producing Vibrations
         Vibrate.vibrate();
       }
     });
   }
 
+  // Disposing the controller
   @override
   void dispose() {
     controller?.dispose();

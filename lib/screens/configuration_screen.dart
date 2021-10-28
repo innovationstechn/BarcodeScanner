@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:serial_number_barcode_scanner/models/configuration_hive.dart';
 import 'package:serial_number_barcode_scanner/state/configuration_state.dart';
-import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
+import 'package:serial_number_barcode_scanner/widgets/simple_button.dart';
 
 class Configuration extends StatefulWidget {
   const Configuration({Key? key}) : super(key: key);
@@ -12,7 +12,7 @@ class Configuration extends StatefulWidget {
   _ConfigurationState createState() => _ConfigurationState();
 }
 
-class _ConfigurationState extends State<Configuration> with CustomizeWidgets {
+class _ConfigurationState extends State<Configuration>{
   final urlController = TextEditingController();
   final deviceIDController = TextEditingController();
   final keyController = TextEditingController();
@@ -52,7 +52,7 @@ class _ConfigurationState extends State<Configuration> with CustomizeWidgets {
                         customizeTextInput(
                             keyController, "KEY", "Enter the KEY"),
                         const SizedBox(height: 40,),
-                        customizeButton("SAVE", 70, () async {
+                        SimpleButton("SAVE", 70, () async {
                           ConfigurationHive configurationHive = ConfigurationHive(
                               apiUrl: urlController.text,
                               deviceID: deviceIDController.text,
@@ -69,6 +69,35 @@ class _ConfigurationState extends State<Configuration> with CustomizeWidgets {
               }
           )
       ),
+    );
+  }
+
+  Widget customizeTextInput(
+      TextEditingController controller, String title, String hint) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+        ),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.black12),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+            ),
+            hintText: hint,
+            // hintStyle: const TextStyle(color: Colors.grey),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        )
+      ],
     );
   }
 }

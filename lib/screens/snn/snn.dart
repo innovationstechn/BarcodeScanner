@@ -1,25 +1,26 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:serial_number_barcode_scanner/screens/final/final.dart';
 import 'package:serial_number_barcode_scanner/screens/snn/snn_provider.dart';
-import 'package:serial_number_barcode_scanner/widgets/customize_widgets_mixin.dart';
+import 'package:serial_number_barcode_scanner/widgets/display_barcode.dart';
 import 'package:serial_number_barcode_scanner/widgets/qr_mixin.dart';
+import 'package:serial_number_barcode_scanner/widgets/qr_view_style.dart';
+import 'package:serial_number_barcode_scanner/widgets/scan_button.dart';
+import 'package:serial_number_barcode_scanner/widgets/simple_button.dart';
 
 class SNN extends StatefulWidget {
-  final String DNN, EAN;
+  final String dnn, ean;
 
-  const SNN({required this.DNN, required this.EAN});
+  const SNN({required this.dnn, required this.ean});
 
   @override
   State<StatefulWidget> createState() => _SNN();
 }
 
-class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
-  Barcode? result;
+class _SNN extends State<SNN> with QRCode{
   QRViewController? controller;
   bool scanningState = false;
 
@@ -49,10 +50,11 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
                       children: [
                         SizedBox(
                             width: MediaQuery.of(context).size.width * 0.9,
-                            child: customizeDisplayBarCode("DNN", widget.DNN)),
+                            child: DisplayBarCode(
+                                barcodeName: "DNN", barcode: widget.dnn)),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.9,
-                          child: customizeButton("FINISH", 80, () async {
+                          child: SimpleButton("FINISH", 80, () async {
                             int scanItem =
                                 Provider.of<SNNProvider>(context, listen: false)
                                     .snnCodes
@@ -82,8 +84,8 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
                 )),
             Expanded(
                 flex: 5,
-                child: customizeQRView(
-                    buildQrView(context, _onQRViewCreated, 250))),
+                child:
+                    QRViewStyle(buildQrView(context, _onQRViewCreated, 250))),
             Expanded(
                 flex: 3,
                 child: FittedBox(
@@ -95,20 +97,21 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
                       children: [
                         SizedBox(
                             width: MediaQuery.of(context).size.width * 0.9,
-                            child: customizeDisplayBarCode(
-                                "Current EAN", widget.EAN)),
+                            child: DisplayBarCode(
+                                barcodeName: "Current EAN",
+                                barcode: widget.ean)),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.9,
                           child: Consumer<SNNProvider>(
                             builder: (context, model, child) {
                               return Padding(
                                   padding: const EdgeInsets.only(top: 10),
-                                  child: customizeScanButton(
-                                    scanningState,
-                                    70,
-                                    35,
-                                    "SCAN SNN",
-                                    () {
+                                  child: ScanButton(
+                                    scanningState: scanningState,
+                                    height: 70,
+                                    fontSize: 35,
+                                    name: "SCAN SNN",
+                                    btnClick: () {
                                       scanningState = !scanningState;
                                       model.setState();
                                     },
@@ -147,17 +150,23 @@ class _SNN extends State<SNN> with QRCode, CustomizeWidgets {
     );
   }
 
+  // This method will be called when QRScanner view is created.
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
+    // Controller is listening to the stream of scan codes.
     controller.scannedDataStream.listen((scanData) async {
       if (scanningState) {
+        // Disabling the scan
         scanningState = !scanningState;
+        // SNN Provider is saving the scan bar code for temporary storage also notifying listener.
         Provider.of<SNNProvider>(context, listen: false).add(scanData);
+        // Producing Vibrations
         Vibrate.vibrate();
       }
     });
   }
 
+  // Disposing the controller
   @override
   void dispose() {
     controller?.dispose();

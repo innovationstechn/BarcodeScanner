@@ -5,27 +5,25 @@ import 'package:serial_number_barcode_scanner/screens/dnn/dnn.dart';
 import 'package:serial_number_barcode_scanner/screens/ean/ean.dart';
 import 'package:serial_number_barcode_scanner/screens/final/final.dart';
 import 'package:serial_number_barcode_scanner/screens/snn/snn.dart';
-
-import 'main.dart';
-
+import 'package:serial_number_barcode_scanner/screens/starting/starting.dart';
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(
-            builder: (_) => const MyHome());
+            builder: (_) => const StartingPage());
       case 'dnn':
         return MaterialPageRoute(
-            builder: (_) => DNNScreen());
+            builder: (_) => const DNNScreen());
       case 'ean':
         String arg = settings.arguments as String;
         return MaterialPageRoute(
-            builder: (_) => EAN(DNN: arg));
+            builder: (_) => EAN(dnn: arg));
       case 'snn':
         List<dynamic> args = settings.arguments as List<dynamic>;
         return MaterialPageRoute(
           builder: (_) =>
-              SNN(DNN: args[0], EAN: args[1]),
+              SNN(dnn: args[0], ean: args[1]),
         );
       case 'final':
         return MaterialPageRoute(
