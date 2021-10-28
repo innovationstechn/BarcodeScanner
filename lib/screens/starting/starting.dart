@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,13 +11,31 @@ import 'package:serial_number_barcode_scanner/state/uploading_state.dart';
 import 'package:serial_number_barcode_scanner/widgets/expandable_fittedbox.dart';
 import 'package:serial_number_barcode_scanner/widgets/simple_button.dart';
 
-class StartingPage extends StatelessWidget{
-  const StartingPage({Key? key}) : super(key: key);
+class StartingPage extends StatelessWidget {
+  // This page may optionally be started with a message that can be displayed
+  // in a Snackbar.
+  // This is used when displaying messages when 'Finish' is called on finish page.
+  final String? message;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  StartingPage({Key? key, this.message}) : super(key: key) {
+    if (message != null) {
+      scheduleMicrotask(
+        () => ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          SnackBar(
+            content: Text(message!),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(body: Consumer<ConfigurationState>(
+      child: Scaffold(
+          body: Consumer<ConfigurationState>(
+        key: _scaffoldKey,
         builder: (context, configModel, child) {
           return Consumer<UploadingState>(builder: (context, model, child) {
             return Padding(
@@ -25,10 +45,10 @@ class StartingPage extends StatelessWidget{
                       2,
                       Center(
                           child: Text(
-                            "Barcode Scanner",
-                            style: TextStyle(
-                                fontSize: 30, fontWeight: FontWeight.bold),
-                          ))),
+                        "Barcode Scanner",
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ))),
                   ExpandableFittedBox(
                       3,
                       Column(
@@ -45,17 +65,17 @@ class StartingPage extends StatelessWidget{
                           else if (model.itemsNeedToBeUploaded)
                             const Center(
                                 child: Text(
-                                  "UNSENT SERIALS",
-                                  style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold),
-                                )),
+                              "UNSENT SERIALS",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold),
+                            )),
                           if (model.itemsNeedToBeUploaded)
                             SimpleButton(
                               "SEND MANUALLY",
                               150,
-                                  () async {
+                              () async {
                                 String response = await model
                                     .upload(configModel.configuration!);
 
@@ -76,19 +96,19 @@ class StartingPage extends StatelessWidget{
                           configModel.isConfigurationNeeded
                               ? null
                               : () async {
-                            Navigator.pushNamed(context, 'dnn')
-                                .then((value) => {
-                              Provider.of<DNNProvider>(context,
-                                  listen: false)
-                                  .dnnCode = "",
-                              Provider.of<EANProvider>(context,
-                                  listen: false)
-                                  .eanCode = "",
-                              Provider.of<SNNProvider>(context,
-                                  listen: false)
-                                  .snnCodes = []
-                            });
-                          })),
+                                  Navigator.pushNamed(context, 'dnn')
+                                      .then((value) => {
+                                            Provider.of<DNNProvider>(context,
+                                                    listen: false)
+                                                .dnnCode = "",
+                                            Provider.of<EANProvider>(context,
+                                                    listen: false)
+                                                .eanCode = "",
+                                            Provider.of<SNNProvider>(context,
+                                                    listen: false)
+                                                .snnCodes = []
+                                          });
+                                })),
                   ExpandableFittedBox(
                       2,
                       SimpleButton("CONFIGURATION", 80, () async {

@@ -106,7 +106,7 @@ class _FinalState extends State<Final> {
                 ),
                 ExpandableFittedBox(
                     3,
-                    SimpleButton("FINISH/SEND", 150, () {
+                    SimpleButton("FINISH/SEND", 150, () async {
                       fetchAllScanData(true);
                       // Storing the last dnn scanned.
                       if (dnn.isNotEmpty) {
@@ -124,15 +124,17 @@ class _FinalState extends State<Final> {
                         id = configurationState.configuration!.deviceID;
                         key = configurationState.configuration!.key;
 
-                        onFinishPressed(context, model.dnnList, key, id);
+                        var response = await onFinishPressed(
+                            context, model.dnnList, key, id);
                         model.dnnList = [];
                         clearAllScanData();
                         // Navigate to main page
                         Navigator.pushAndRemoveUntil<dynamic>(
                             context,
                             MaterialPageRoute<dynamic>(
-                              builder: (BuildContext context) =>
-                                  const StartingPage(),
+                              builder: (BuildContext context) => StartingPage(
+                                message: response,
+                              ),
                             ),
                             (route) =>
                                 false); //if you want to disable back feature set to false
@@ -146,7 +148,7 @@ class _FinalState extends State<Final> {
     );
   }
 
-  Future<void> onFinishPressed(
+  Future<String> onFinishPressed(
       BuildContext context, List<DNN> scanned, String key, String id) async {
     ConfigurationHive configurationHive =
         Provider.of<ConfigurationState>(context, listen: false).configuration!;
@@ -154,14 +156,8 @@ class _FinalState extends State<Final> {
     for (var element in scanned) {
       await Provider.of<UploadingState>(context, listen: false).queue(element);
     }
-    String response = await Provider.of<UploadingState>(context, listen: false)
+    return await Provider.of<UploadingState>(context, listen: false)
         .upload(configurationHive);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(response),
-      ),
-    );
   }
 
   // Clearing all the DNN previous data stored in temporary storage(Providers) to enable next DNN Scan
@@ -209,7 +205,7 @@ class _FinalState extends State<Final> {
                 Navigator.pushAndRemoveUntil<dynamic>(
                     context,
                     MaterialPageRoute<dynamic>(
-                      builder: (BuildContext context) => const StartingPage(),
+                      builder: (BuildContext context) => StartingPage(),
                     ),
                     (route) =>
                         false); //if you want to disable back feature set to false

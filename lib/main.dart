@@ -12,6 +12,7 @@ import 'package:serial_number_barcode_scanner/screens/snn/snn_provider.dart';
 import 'package:serial_number_barcode_scanner/screens/starting/starting.dart';
 import 'package:serial_number_barcode_scanner/state/configuration_state.dart';
 import 'package:serial_number_barcode_scanner/state/uploading_state.dart';
+
 import 'api/data_uploader.dart';
 import 'models/configuration_hive.dart';
 
@@ -28,7 +29,7 @@ void main() async {
           create: (context) => UploadingState()),
       ChangeNotifierProvider<FinalProvider>(create: (_) => FinalProvider()),
     ],
-    child: const MaterialApp(
+    child: MaterialApp(
       home: StartingPage(),
       onGenerateRoute: Routes.generateRoute,
     ),
@@ -45,4 +46,3 @@ Future<void> _initHive() async {
   await DataUploader.initialize();
   await ConfigurationState.initialize();
 }
-
