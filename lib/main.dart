@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:serial_number_barcode_scanner/models/dnn_model.dart';
+import 'package:serial_number_barcode_scanner/models/ean_model.dart';
+import 'package:serial_number_barcode_scanner/models/sn.dart';
 import 'package:serial_number_barcode_scanner/routes.dart';
 import 'package:serial_number_barcode_scanner/screens/dnn/dnn_provider.dart';
 import 'package:serial_number_barcode_scanner/screens/ean/enn_provider.dart';
